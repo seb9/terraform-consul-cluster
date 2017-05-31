@@ -42,7 +42,9 @@ resource "aws_iam_policy" "leader-discovery" {
             "Action": [
                 "autoscaling:DescribeAutoScalingInstances",
                 "autoscaling:DescribeAutoScalingGroups",
-                "ec2:DescribeInstances"
+                "ec2:DescribeInstances",
+                "ec2:CreateTags",
+                "ec2:DescribeTags"
             ],
             "Resource": [
                 "*"
@@ -58,6 +60,9 @@ resource "aws_iam_policy" "leader-discovery" {
 //  instances.
 resource "aws_iam_role" "consul-instance-role" {
   name = "consul-instance-role"
+  path        = "/"
+  description = ""
+
 
   assume_role_policy = <<EOF
 {
@@ -75,6 +80,7 @@ resource "aws_iam_role" "consul-instance-role" {
 }
 EOF
 }
+
 
 //  Attach the policies to the role.
 resource "aws_iam_policy_attachment" "consul-instance-forward-logs" {

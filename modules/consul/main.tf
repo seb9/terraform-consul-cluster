@@ -35,9 +35,10 @@ data "template_file" "consul" {
   template = "${file("${path.module}/files/consul-node.sh")}"
 
   vars {
-    asgname = "${var.asgname}"
-    region  = "${var.region}"
-    size    = "${var.min_size}"
+    asgname                         = "${var.asgname}"
+    region                          = "${var.region}"
+    consul_server_count_expected    = "${var.consul_server_count}"
+    size                            = "${var.min_size}"
   }
 }
 
@@ -91,7 +92,7 @@ resource "aws_elb" "consul-lb" {
 
 //  Auto-scaling group for our cluster.
 resource "aws_autoscaling_group" "consul-cluster-asg" {
-  depends_on           = ["aws_launch_configuration.consul-cluster-lc"]
+  depends_on           = ["aws_launch_configuration.consul-cluster-lc", "aws_cloudwatch_log_group.consul-cluster-docker-log-group"]
   name                 = "${var.asgname}"
   launch_configuration = "${aws_launch_configuration.consul-cluster-lc.name}"
   min_size             = "${var.min_size}"
@@ -113,5 +114,22 @@ resource "aws_autoscaling_group" "consul-cluster-asg" {
     key                 = "Project"
     value               = "consul-cluster"
     propagate_at_launch = true
+  }
+
+  // at boot, the instance does not know if it will be a server or a client
+  tag {
+    key                 = "Consul-Role"
+    value               = "undefined"
+    propagate_at_launch = true
+  }
+}
+
+// Cloudwatch log group for Docker app logs
+resource "aws_cloudwatch_log_group" "consul-cluster-docker-log-group" {
+  name = "/var/log/docker-container"
+
+  tags {
+    Environment = "Project"
+    Application = "consul-cluster"
   }
 }

@@ -18,6 +18,7 @@ module "consul-cluster" {
   key_name        = "consul-cluster"
   public_key_path = "${var.public_key_path}"
   asgname         = "consul-asg"
+  consul_server_count = "3"
 }
 
 //  We'll also show the DNS to the consul cluster.

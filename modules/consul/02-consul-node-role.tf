@@ -30,7 +30,7 @@ resource "aws_iam_policy" "forward-logs" {
 resource "aws_iam_policy" "leader-discovery" {
   name        = "consul-node-leader-discovery"
   path        = "/"
-  description = "This policy allows a consul server to discover a consul leader by examining the instances in a consul cluster Auto-Scaling group. It needs to describe the instances in the auto scaling group, then check the IPs of the instances."
+  description = "This policy allows a consul server to discover a consul leader by examining the instances."
 
   policy = <<EOF
 {
@@ -40,11 +40,7 @@ resource "aws_iam_policy" "leader-discovery" {
             "Sid": "Stmt1468377974000",
             "Effect": "Allow",
             "Action": [
-                "autoscaling:DescribeAutoScalingInstances",
-                "autoscaling:DescribeAutoScalingGroups",
-                "ec2:DescribeInstances",
-                "ec2:CreateTags",
-                "ec2:DescribeTags"
+                "ec2:DescribeInstances"
             ],
             "Resource": [
                 "*"

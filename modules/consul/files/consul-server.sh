@@ -14,8 +14,6 @@ SUBNET_ID=$(curl http://169.254.169.254/latest/meta-data/network/interfaces/macs
 AZ=$(curl http://169.254.169.254/latest/meta-data/placement/availability-zone)
 SUBNET_A_ID="${subnet_a}"
 SUBNET_B_ID="${subnet_b}"
-NOMAD_SUBNET_A_ID="${nomad_subnet_a}"
-NOMAD_SUBNET_B_ID="${nomad_subnet_b}"
 
 # Sets the "other" Subnet
 [[ $SUBNET_ID = $SUBNET_A_ID ]] && OTHER_SUBNET="$SUBNET_B_ID" || OTHER_SUBNET="$SUBNET_A_ID"
@@ -30,12 +28,7 @@ chown consul:consul /opt/consul/
 # Allow consul to bind to lower ports (DNS)
 setcap 'cap_net_bind_service=+ep' /usr/local/sbin/consul
 
-# Install nomad and init script
-curl -so /etc/init.d/nomad https://gist.githubusercontent.com/sybeck2k/1f8bf89a488cfcd9796c4d6e41b8bb75/raw/34719b19254abc02e2a9806a7fc245256942b3bd/nomad && chmod +x /etc/init.d/nomad
-curl -so nomad.zip https://releases.hashicorp.com/nomad/0.5.6/nomad_0.5.6_linux_amd64.zip?_ga=2.226815704.450980263.1496326972-1740804836.1489764259 && unzip nomad.zip && mv nomad /usr/local/sbin/ && rm nomad.zip
-mkdir -p {/opt/nomad,/etc/nomad.d}
-
-# Update the packages, install CloudWatch tools.
+# Update the packages, install CloudWatch tools, Docker and jq.
 yum update -y
 yum install -y awslogs jq docker
 
@@ -98,11 +91,6 @@ function cluster-instance-ips {
 # Return the IP of each running consul server in the other subnet.
 function cluster-instance-ips-other-az {
     aws --region="$REGION" ec2 describe-instances --filters "Name=network-interface.subnet-id,Values=$OTHER_SUBNET" "Name=tag:Consul-Role,Values=server" "Name=instance-state-code,Values=16" --query="Reservations[].Instances[].[PrivateIpAddress]" --output="text"
-}
-
-# Return the IP of each nomad server (in both nomad bastion subnets)
-function nomad-server-ips {
-    aws --region="$REGION" ec2 describe-instances --filters "Name=network-interface.subnet-id,Values=$NOMAD_SUBNET_A_ID,$NOMAD_SUBNET_B_ID" "Name=tag:Nomad-Role,Values=server" "Name=instance-state-code,Values=16" --query="Reservations[].Instances[].[PrivateIpAddress]" --output="text"
 }
 
 # Wait until we have as many cluster instances as we are expecting (this is managed by AWS autoscaling).
@@ -186,42 +174,6 @@ EOF
 # start consul
 service consul start
 chkconfig consul on
-
-# build the server array for nomad
-NOMAD_SERVER_IPS=""
-NOMAD_SERVICE_IPS=$(nomad-server-ips)
-
-for i in $NOMAD_SERVICE_IPS
-do 
-    if ! [ "$i" == "$$IP" ]
-    then
-        NOMAD_SERVER_IPS="$NOMAD_SERVER_IPS,\"$i\""
-    fi
-done
-NOMAD_SERVER_IPS=$(echo "$NOMAD_SERVER_IPS" | cut -c 2-)
-
-cat <<- EOF | sudo tee /etc/nomad.d/nomad.json
-{
-  "data_dir" : "/opt/nomad",
-  "name"     : "$INSTANCE_ID",
-  "datacenter"  : "$AZ",
-  "client": {
-    "enabled"       : true,
-    "network_speed" : 100,
-    "options"       : {
-      "driver.raw_exec.enable": true,
-      "docker.auth.config": "/home/ec2-user/.docker/config.json"
-    },
-    "servers" : [
-      $NOMAD_SERVER_IPS
-    ]
-  }
-}
-EOF
-
-# start nomad
-service nomad start
-chkconfig nomad on
 
 # start docker
 service docker start

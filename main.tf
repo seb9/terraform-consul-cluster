@@ -26,8 +26,3 @@ module "consul-cluster" {
   consul_server_count      = "3"
   nomad_server_count       = "2"
 }
-
-//  We'll also show the DNS to the consul cluster.
-/*output "consul-dns" {
-  value = "${module.consul-cluster.consul-dns}"
-}*/

@@ -73,34 +73,6 @@ resource "aws_subnet" "bastion-b" {
   }
 }
 
-/*
-//  Create a frontend subnet for each AZ.
-resource "aws_subnet" "frontend-a" {
-  vpc_id                  = "${aws_vpc.consul-cluster.id}"
-  cidr_block              = "${var.subnet_frontend_cidr1}"                       // i.e. 10.0.1.0 to 10.0.1.255
-  availability_zone       = "${lookup(var.subnetaz1, var.region)}"
-  map_public_ip_on_launch = true
-  depends_on              = ["aws_internet_gateway.consul-cluster"]
-
-  tags {
-    Name    = "Consul Cluster Public Subnet"
-    Project = "consul-cluster"
-  }
-}
-
-resource "aws_subnet" "frontend-b" {
-  vpc_id                  = "${aws_vpc.consul-cluster.id}"
-  cidr_block              = "${var.subnet_frontend_cidr2}"                       // i.e. 10.0.2.0 to 10.0.1.255
-  availability_zone       = "${lookup(var.subnetaz2, var.region)}"
-  map_public_ip_on_launch = true
-  depends_on              = ["aws_internet_gateway.consul-cluster"]
-
-  tags {
-    Name    = "Consul Cluster Public Subnet"
-    Project = "consul-cluster"
-  }
-}
-*/
 //  Create a route table allowing all addresses access to the IGW.
 resource "aws_route_table" "public" {
   vpc_id = "${aws_vpc.consul-cluster.id}"
@@ -139,20 +111,6 @@ resource "aws_route_table_association" "bastion-b" {
   subnet_id      = "${aws_subnet.bastion-b.id}"
   route_table_id = "${aws_route_table.public.id}"
 }
-
-/*
-//  Now associate the route table with the public subnet - giving
-//  all frontend subnet instances access to the internet.
-resource "aws_route_table_association" "frontend-a" {
-  subnet_id      = "${aws_subnet.frontend-a.id}"
-  route_table_id = "${aws_route_table.public.id}"
-}
-
-resource "aws_route_table_association" "frontend-b" {
-  subnet_id      = "${aws_subnet.frontend-b.id}"
-  route_table_id = "${aws_route_table.public.id}"
-}
-*/
 
 //  Create an internal security group for the VPC, which allows everything in the VPC
 //  to talk to everything else.

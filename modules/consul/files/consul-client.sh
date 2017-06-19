@@ -188,8 +188,7 @@ cat <<- EOF | sudo tee /etc/nomad.d/nomad.json
     "enabled"       : true,
     "network_speed" : 100,
     "options"       : {
-      "driver.raw_exec.enable": true,
-      "docker.auth.config": "/home/ec2-user/.docker/config.json"
+      "driver.raw_exec.enable": true
     },
     "servers" : [
       $NOMAD_SERVER_IPS

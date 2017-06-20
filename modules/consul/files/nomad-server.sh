@@ -41,36 +41,45 @@ yum install -y awslogs jq docker
 
 # Create a config file for awslogs to push logs to the same region of the cluster.
 cat <<- EOF | sudo tee /etc/awslogs/awscli.conf
-  [plugins]
-  cwlogs = cwlogs
-  [default]
-  region = ${region}
+	[plugins]
+	cwlogs = cwlogs
+	[default]
+	region = ${region}
 EOF
 
 # Create a config file for awslogs to log our user-data log.
 cat <<- EOF | sudo tee /etc/awslogs/config/user-data.conf
-  [/var/log/user-data.log]
-  file = /var/log/user-data.log
-  log_group_name = /var/log/user-data.log
-  log_stream_name = $INSTANCE_ID
+	[/var/log/user-data.log]
+	file = /var/log/user-data.log
+	log_group_name = /var/log/user-data.log
+	log_stream_name = $INSTANCE_ID
 EOF
 
 # Create a config file for awslogs to log our docker log.
 cat <<- EOF | sudo tee /etc/awslogs/config/docker.conf
-  [/var/log/docker]
-  file = /var/log/docker
-  log_group_name = /var/log/docker
-  log_stream_name = $INSTANCE_ID
-  datetime_format = %Y-%m-%dT%H:%M:%S.%f
+	[/var/log/docker]
+	file = /var/log/docker
+	log_group_name = /var/log/docker
+	log_stream_name = $INSTANCE_ID
+	datetime_format = %Y-%m-%dT%H:%M:%S.%f
 EOF
 
 # Create a config file for awslogs to log our docker log.
 cat <<- EOF | sudo tee /etc/awslogs/config/consul.conf
-  [/var/log/consul]
-  file = /var/log/consul
-  log_group_name = /var/log/consul
-  log_stream_name = $INSTANCE_ID
-  datetime_format = %Y-%m-%dT%H:%M:%S.%f
+	[/var/log/consul]
+	file = /var/log/consul
+	log_group_name = /var/log/consul
+	log_stream_name = $INSTANCE_ID
+	datetime_format = %Y-%m-%dT%H:%M:%S.%f
+EOF
+
+# Create a config file for awslogs to log our nomad log.
+cat <<- EOF | sudo tee /etc/awslogs/config/nomad.conf
+	[/var/log/nomad]
+	file = /var/log/nomad
+	log_group_name = /var/log/nomad
+	log_stream_name = $INSTANCE_ID
+	datetime_format = %Y-%m-%dT%H:%M:%S.%f
 EOF
 
 # seems an issue to start awslogs too early...let's wait
@@ -187,3 +196,6 @@ chkconfig nomad on
 # start docker
 service docker start
 chkconfig docker on
+
+# launch hashi-ui
+docker run -e NOMAD_ENABLE=1 -e NOMAD_ADDR=http://$IP:4646 -e CONSUL_ENABLE=1 -e CONSUL_ADDR=$IP:8500 -p 8000:3000 -d --name hashi-ui jippi/hashi-ui

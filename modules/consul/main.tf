@@ -134,35 +134,6 @@ resource "aws_launch_configuration" "nomad-cluster-server-lc" {
   key_name = "${var.key_name}"
 }
 
-//  Load balancers for our consul cluster.
-/*
-resource "aws_elb" "consul-lb" {
-  name = "consul-lb"
-
-  security_groups = [
-    "${aws_security_group.consul-cluster-vpc.id}",
-    "${aws_security_group.consul-cluster-public-web.id}",
-  ]
-
-  subnets = ["${aws_subnet.public-a.id}", "${aws_subnet.public-b.id}"]
-
-  listener {
-    instance_port     = 8500
-    instance_protocol = "http"
-    lb_port           = 8500
-    lb_protocol       = "http"
-  }
-
-  health_check {
-    healthy_threshold   = 2
-    unhealthy_threshold = 2
-    timeout             = 3
-    target              = "HTTP:8500/ui/"
-    interval            = 30
-  }
-}
-*/
-
 //  Auto-scaling group for our cluster (zone a).
 resource "aws_autoscaling_group" "consul-server-asg-a" {
   depends_on           = ["aws_launch_configuration.consul-cluster-server-lc", "aws_cloudwatch_log_group.consul-cluster-docker-log-group"]

@@ -73,6 +73,15 @@ cat <<- EOF | sudo tee /etc/awslogs/config/consul.conf
   datetime_format = %Y-%m-%dT%H:%M:%S.%f
 EOF
 
+# Create a config file for awslogs to log our nomad log.
+cat <<- EOF | sudo tee /etc/awslogs/config/nomad.conf
+  [/var/log/nomad]
+  file = /var/log/nomad
+  log_group_name = /var/log/nomad
+  log_stream_name = $INSTANCE_ID
+  datetime_format = %Y-%m-%dT%H:%M:%S.%f
+EOF
+
 # seems an issue to start awslogs too early...let's wait
 sleep 2
 

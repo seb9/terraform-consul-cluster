@@ -13,8 +13,6 @@ module "consul-cluster" {
   vpc_cidr                 = "10.0.0.0/16"
   subnetaz1                = "${var.subnetaz1}"
   subnetaz2                = "${var.subnetaz2}"
-  subnet_frontend_cidr1    = "10.0.1.0/25"
-  subnet_frontend_cidr2    = "10.0.1.128/25"
   subnet_backend_cidr1     = "10.0.2.0/25"
   subnet_backend_cidr2     = "10.0.2.128/25"
   subnet_bastion_cidr1     = "10.0.255.0/25"

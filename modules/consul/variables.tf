@@ -36,14 +36,6 @@ variable "subnetaz2" {
   type = "map"
 }
 
-variable "subnet_frontend_cidr1" {
-  description = "The CIDR block for the first frontend subnet, e.g: 10.0.1.0/25"
-}
-
-variable "subnet_frontend_cidr2" {
-  description = "The CIDR block for the second frontend subnet, e.g: 10.0.1.1/25"
-}
-
 variable "subnet_backend_cidr1" {
   description = "The CIDR block for the first backend subnet, e.g: 10.0.2.0/25"
 }

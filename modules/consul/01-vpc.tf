@@ -188,9 +188,8 @@ resource "aws_security_group" "consul-cluster-public-web" {
 }
 
 //  Create a security group which allows ssh access from the web.
-//  Remember: This is *not* secure for production! In production, use a Bastion.
-resource "aws_security_group" "consul-cluster-public-ssh" {
-  name        = "consul-cluster-public-ssh"
+resource "aws_security_group" "nomad-cluster-public-ssh" {
+  name        = "nomad-cluster-public-ssh"
   description = "Security group that allows SSH traffic from internet"
   vpc_id      = "${aws_vpc.consul-cluster.id}"
 
@@ -202,7 +201,7 @@ resource "aws_security_group" "consul-cluster-public-ssh" {
   }
 
   tags {
-    Name    = "Consul Cluster Public SSH"
+    Name    = "Nomad Cluster Public SSH"
     Project = "consul-cluster"
   }
 }

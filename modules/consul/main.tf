@@ -81,8 +81,7 @@ resource "aws_launch_configuration" "consul-cluster-server-lc" {
 
   security_groups = [
     "${aws_security_group.consul-cluster-vpc.id}",
-    "${aws_security_group.consul-cluster-public-web.id}",
-    "${aws_security_group.consul-cluster-public-ssh.id}",
+    "${aws_security_group.consul-cluster-public-web.id}"
   ]
 
   lifecycle {
@@ -102,8 +101,7 @@ resource "aws_launch_configuration" "consul-cluster-client-lc" {
 
   security_groups = [
     "${aws_security_group.consul-cluster-vpc.id}",
-    "${aws_security_group.consul-cluster-public-web.id}",
-    "${aws_security_group.consul-cluster-public-ssh.id}",
+    "${aws_security_group.consul-cluster-public-web.id}"
   ]
 
   lifecycle {
@@ -123,8 +121,7 @@ resource "aws_launch_configuration" "nomad-cluster-server-lc" {
 
   security_groups = [
     "${aws_security_group.consul-cluster-vpc.id}",
-    "${aws_security_group.consul-cluster-public-web.id}",
-    "${aws_security_group.consul-cluster-public-ssh.id}",
+    "${aws_security_group.nomad-cluster-public-ssh.id}"
   ]
 
   lifecycle {
